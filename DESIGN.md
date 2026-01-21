@@ -69,3 +69,85 @@ We use a consistent 4px base unit spacing system. **Do not use arbitrary values.
 - **Between headings and content**: `mb-6` (24px)
 
 ---
+
+## Border Guidelines
+
+### Border Widths
+
+| Token | Value | Tailwind Class | Usage |
+|-------|-------|----------------|-------|
+| Default | 1px | `border` | Standard borders |
+| Medium | 2px | `border-2` | Emphasis, focus states |
+
+### Border Radius
+
+| Token | Value | Tailwind Class | Usage |
+|-------|-------|----------------|-------|
+| `sm` | 4px | `rounded-sm` | Subtle rounding |
+| `md` | 6px | `rounded-md` | Buttons, inputs |
+| `lg` | 8px | `rounded-lg` | Cards, modals |
+| `full` | 9999px | `rounded-full` | Pills, avatars |
+
+### Border Colors
+
+- **Default borders**: `border-gray-200` or `border-gray-300`
+- **Focus borders**: `border-primary` (green)
+- **Error borders**: `border-error` (red)
+- **Dividers**: `border-gray-200`
+
+### Standard Border Patterns
+
+```html
+<!-- Card -->
+<div class="border border-gray-200 rounded-lg">
+
+<!-- Input (default) -->
+<input class="border border-gray-300 rounded-md">
+
+<!-- Input (focus) -->
+<input class="border border-gray-300 rounded-md focus:border-primary focus:ring-0">
+
+<!-- Input (error) -->
+<input class="border border-error rounded-md">
+```
+
+---
+
+## Animation Policy
+
+### ⚠️ NO ANIMATIONS ALLOWED
+
+To maintain a professional, distraction-free user experience, **animations are strictly prohibited** unless explicitly approved.
+
+#### Forbidden
+
+- ❌ CSS transitions on colors, backgrounds, or shadows
+- ❌ Transform animations (scale, rotate, translate)
+- ❌ Keyframe animations
+- ❌ Loading spinners with complex animations
+- ❌ Hover effects that animate properties
+- ❌ Page transition animations
+
+#### Allowed (Minimal)
+
+- ✅ Immediate state changes (no transition duration)
+- ✅ Simple opacity changes for showing/hiding elements (max 150ms)
+- ✅ Focus ring appearance (browser default or instant)
+
+#### Implementation
+
+Always set transition to none or remove transition classes:
+
+```css
+/* DO NOT USE */
+.button {
+  transition: all 0.3s ease;
+}
+
+/* USE THIS */
+.button {
+  transition: none;
+}
+```
+
+---
