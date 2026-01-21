@@ -151,3 +151,58 @@ Always set transition to none or remove transition classes:
 ```
 
 ---
+
+## Utility Class Usage
+
+### How to Apply Colors
+
+```html
+<!-- Primary button -->
+<button class="bg-primary text-white hover:bg-primary-dark">
+  Submit
+</button>
+
+<!-- Secondary button -->
+<button class="bg-white text-primary border border-primary hover:bg-gray-50">
+  Cancel
+</button>
+
+<!-- Error message -->
+<p class="text-error">This field is required</p>
+
+<!-- Error alert -->
+<div class="bg-error-light border border-error text-error-dark p-4 rounded-md">
+  Error message here
+</div>
+```
+
+### How to Apply Spacing
+
+```html
+<!-- Card with standard padding -->
+<div class="p-6 mb-4">
+
+<!-- Form field group -->
+<div class="mb-4">
+  <label class="mb-2 block">Label</label>
+  <input class="px-3 py-2">
+</div>
+
+<!-- Section -->
+<section class="py-12 px-4 md:px-6 lg:px-8">
+```
+
+### How to Apply Borders
+
+```html
+<!-- Standard card -->
+<div class="border border-gray-200 rounded-lg p-6">
+
+<!-- Divider -->
+<hr class="border-t border-gray-200 my-6">
+
+<!-- Focus input -->
+<input class="border border-gray-300 rounded-md focus:border-primary focus:outline-none">
+```
+
+---
