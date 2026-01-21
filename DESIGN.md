@@ -34,3 +34,38 @@ This document defines the design principles, color palette, spacing, and utility
 | **Error Red** | `#dc2626` | `--color-error` | `bg-error`, `text-error` | Error messages, destructive actions |
 | **Error Red Light** | `#fef2f2` | `--color-error-light` | `bg-error-light` | Error backgrounds |
 | **Error Red Dark** | `#b91c1c` | `--color-error-dark` | `text-error-dark` | Error hover states |
+
+---
+
+## Spacing System
+
+We use a consistent 4px base unit spacing system. **Do not use arbitrary values.**
+
+### Standard Spacing Scale
+
+| Token | Value | CSS Variable | Tailwind Class | Usage |
+|-------|-------|--------------|----------------|-------|
+| `xs` | 4px | `--spacing-xs` | `p-1`, `m-1` | Tight spacing, icon gaps |
+| `sm` | 8px | `--spacing-sm` | `p-2`, `m-2` | Compact elements |
+| `md` | 16px | `--spacing-md` | `p-4`, `m-4` | Default component padding |
+| `lg` | 24px | `--spacing-lg` | `p-6`, `m-6` | Section spacing |
+| `xl` | 32px | `--spacing-xl` | `p-8`, `m-8` | Large section gaps |
+| `2xl` | 48px | `--spacing-2xl` | `p-12`, `m-12` | Page-level spacing |
+| `3xl` | 64px | `--spacing-3xl` | `p-16`, `m-16` | Hero sections |
+
+### Padding Guidelines
+
+- **Buttons**: `px-4 py-2` (horizontal: 16px, vertical: 8px)
+- **Cards**: `p-4` or `p-6` (16px or 24px)
+- **Form inputs**: `px-3 py-2` (horizontal: 12px, vertical: 8px)
+- **Sections**: `py-12` or `py-16` (48px or 64px vertical)
+- **Container**: `px-4` on mobile, `px-6` on tablet, `px-8` on desktop
+
+### Margin Guidelines
+
+- **Between form fields**: `mb-4` (16px)
+- **Between sections**: `mb-8` or `mb-12` (32px or 48px)
+- **Between paragraphs**: `mb-4` (16px)
+- **Between headings and content**: `mb-6` (24px)
+
+---
