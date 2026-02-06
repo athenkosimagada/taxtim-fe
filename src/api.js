@@ -1,30 +1,25 @@
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 async function handle(res) {
-  if (!res.ok) throw new Error("API error");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
   return res.json();
 }
 
 export const api = {
-  importTransactions(data) {
-    return fetch(`${API_BASE}/transactions/import`, {
+  importTransactions: (payload) =>
+    fetch(`${API_BASE}/transactions/import`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then(handle);
-  },
+      body: JSON.stringify(payload),
+    }).then(handle),
 
-  calculate() {
-    return fetch(`${API_BASE}/transactions/calculate`).then(handle);
-  },
+  calculate: () => fetch(`${API_BASE}/transactions/calculate`).then(handle),
 
-  taxYear(year) {
-    return fetch(`${API_BASE}/reports/tax-year/${year}`).then(handle);
-  },
-
-  clearAll() {
-    return fetch(`${API_BASE}/transactions`, {
+  clearAll: () =>
+    fetch(`${API_BASE}/transactions`, {
       method: "DELETE",
-    }).then(handle);
-  },
+    }).then(handle),
 };

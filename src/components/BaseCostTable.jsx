@@ -1,29 +1,25 @@
-import { money } from "../lib/utils";
-
-export default function BaseCostTable({ data }) {
+export function BaseCostTable({ data, title }) {
   return (
-    <table className="w-full bg-white rounded shadow text-sm">
-      <thead className="bg-slate-100">
-        <tr>
-          <th className="text-start">Tax Year</th>
-          <th className="text-start">Asset</th>
-          <th className="text-start">Quantity</th>
-          <th className="text-start">Base Cost</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {Object.entries(data).map(([year, assets]) =>
-          Object.entries(assets).map(([asset, v]) => (
-            <tr key={year + asset} className="border-t">
-              <td>{year}</td>
+    <section className="bg-white p-4 rounded shadow">
+      <h2 className="font-semibold mb-2">{title}</h2>
+      <table className="w-full text-sm border">
+        <thead className="bg-slate-100">
+          <tr>
+            <th>Asset</th>
+            <th>Quantity</th>
+            <th>Base Cost (ZAR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(data).map(([asset, v]) => (
+            <tr key={asset}>
               <td>{asset}</td>
               <td>{v.quantity}</td>
-              <td>{money(v.cost)}</td>
+              <td>{v.cost}</td>
             </tr>
-          )),
-        )}
-      </tbody>
-    </table>
+          ))}
+        </tbody>
+      </table>
+    </section>
   );
 }

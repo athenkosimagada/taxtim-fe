@@ -1,23 +1,15 @@
-import { money } from "../lib/utils";
-
-export default function CapitalGainsTable({ data }) {
+export function CapitalGainsTable({ data }) {
   return (
-    <table className="w-full bg-white rounded shadow text-sm">
-      <thead className="bg-slate-100">
-        <tr>
-          <th className="text-start">Asset</th>
-          <th className="text-start">Gain / Loss</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {Object.entries(data).map(([asset, v]) => (
-          <tr key={asset} className="border-t">
-            <td>{asset}</td>
-            <td className="font-semibold">{money(v)}</td>
-          </tr>
+    <section className="bg-white p-4 rounded shadow">
+      <h2 className="font-semibold mb-2">Capital Gains</h2>
+      <ul>
+        {Object.entries(data).map(([asset, value]) => (
+          <li key={asset} className="flex justify-between">
+            <span>{asset}</span>
+            <span className="font-semibold">R{value}</span>
+          </li>
         ))}
-      </tbody>
-    </table>
+      </ul>
+    </section>
   );
 }

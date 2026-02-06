@@ -7,84 +7,61 @@ export function cn(...inputs) {
 
 export function parseExcelPaste(text) {
   const lines = text.trim().split("\n");
-  const headers = lines.shift().split("\t");
+  const headers = lines[0].split("\t");
 
-  return lines.map((line) => {
+  return lines.slice(1).map((line) => {
     const values = line.split("\t");
     const row = {};
+
     headers.forEach((h, i) => {
-      row[h.trim()] = values[i]?.trim();
+      row[h] = values[i] || null;
     });
 
-    return {
-      wallet: "default",
-      type: row.type,
-      assetFrom: row.assetFrom || null,
-      assetTo: row.assetTo || null,
-      quantity: Number(row.quantity),
-      unitPriceZar: Number(row.unitPriceZar),
-      feeZar: Number(row.feeZar || 0),
-      assetFromMarketPriceZar: row.assetFromMarketPriceZar
-        ? Number(row.assetFromMarketPriceZar)
-        : null,
-      executedAt: row.executedAt,
-    };
+    row.quantity = Number(row.quantity);
+    row.unitPriceZar = Number(row.unitPriceZar);
+    row.assetFromMarketPriceZar = row.assetFromMarketPriceZar
+      ? Number(row.assetFromMarketPriceZar)
+      : null;
+
+    return row;
   });
 }
 
-export function money(v) {
-  return `R${Number(v).toLocaleString("en-ZA", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+export function buildDisplayRows(result) {
+  const buys = result.transactions
+    .filter((t) => t.type === "BUY")
+    .map((t) => ({
+      type: "BUY",
+      date: t.executedAt.date.slice(0, 10),
+      asset: `${t.assetTo}`,
+      quantity: t.quantity,
+      unitPriceZar: t.unitPriceZar,
+      fee: t.feeZar,
+      gain: 0,
+      lots: [
+        {
+          quantity: t.quantity,
+          unitPriceZar: t.unitPriceZar,
+          cost: t.quantity * t.unitPriceZar,
+          date: t.executedAt.date.slice(0, 10),
+        },
+      ],
+    }));
 
-export function formatTransactionRow(tx) {
-  switch (tx.type) {
-    case "BUY":
-      return {
-        asset: tx.assetTo,
-        quantity: tx.quantity,
-        subtitle: "Purchase",
-        unitPrice: money(tx.unitPriceZar),
-        fee: money(tx.feeZar),
-        marketPrice: tx.assetFromMarketPriceZar
-          ? money(tx.assetFromMarketPriceZar)
-          : null,
-      };
+  const disposals = result.calculations.map((c) => ({
+    type: c.type,
+    date: c.date,
+    asset: c.type === "TRADE" ? `${c.from} → ${c.to}` : `${c.asset}`,
+    quantity: c.soldQuantity,
+    fee: c.feeZar,
+    gain: c.gain,
+    proceeds: c.proceeds,
+    cost: c.cost,
+    lots: c.lots,
+    taxYear: c.taxYear,
+  }));
 
-    case "SELL":
-      return {
-        asset: tx.assetFrom,
-        quantity: tx.quantity,
-        subtitle: "Disposal",
-        unitPrice: money(tx.unitPriceZar),
-        fee: money(tx.feeZar),
-        marketPrice: tx.assetFromMarketPriceZar
-          ? money(tx.assetFromMarketPriceZar)
-          : null,
-      };
-
-    case "TRADE":
-      return {
-        asset: `${tx.assetFrom} → ${tx.assetTo}`,
-        quantity: tx.quantity,
-        subtitle: "Crypto-to-crypto trade",
-        unitPrice: money(tx.unitPriceZar),
-        fee: money(tx.feeZar),
-        marketPrice: tx.assetFromMarketPriceZar
-          ? money(tx.assetFromMarketPriceZar)
-          : null,
-      };
-
-    default:
-      return {
-        asset: "-",
-        quantity: "-",
-        subtitle: "",
-        unitPrice: "-",
-        fee: "-",
-        marketPrice: "-",
-      };
-  }
+  return [...buys, ...disposals].sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
 }

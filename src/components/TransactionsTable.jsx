@@ -1,131 +1,95 @@
-import { useState, Fragment } from "react";
-import FifoBreakdown from "./FifoBreakdown";
-import { money, formatTransactionRow } from "../lib/utils";
+import { useState } from "react";
 
-export default function TransactionsTable({ transactions, calculations }) {
+export default function TransactionsTable({ rows }) {
   const [open, setOpen] = useState({});
 
-  const expandAll = Object.fromEntries(
-    transactions
-      .map((tx) => {
-        if (tx.type === "SELL" || tx.type === "TRADE") {
-          const dateStr = formatDate(tx.executedAt);
-          const asset = tx.assetFrom || tx.assetTo;
-          const key = `${dateStr}-${asset}`;
-          return [key, true];
-        }
-        return null;
-      })
-      .filter(Boolean),
-  );
+  const toggleAll = (value) => {
+    const o = {};
+    rows.forEach((_, i) => (o[i] = value));
+    setOpen(o);
+  };
 
-  const calcByKey = {};
-  calculations.forEach((c) => {
-    const dateStr = c.date || "";
-    const key = `${dateStr}-${c.asset}`;
-    calcByKey[key] = c;
-  });
-
-  function formatDate(executedAt) {
-    let d;
-    if (typeof executedAt === "string") {
-      d = new Date(executedAt);
-    } else if (executedAt?.date) {
-      d = new Date(executedAt.date);
-    } else {
-      return "";
-    }
-    return d.toISOString().split("T")[0];
-  }
+  const typeColor = (type) => {
+    if (type === "BUY") return "text-green-700";
+    if (type === "SELL") return "text-red-700";
+    return "text-blue-700";
+  };
 
   return (
-    <div>
-      <button
-        onClick={() => setOpen(expandAll)}
-        className="mb-2 text-sm underline"
-      >
-        Expand all calculations
-      </button>
+    <div className="bg-white p-5 rounded shadow">
+      <div className="flex justify-between mb-3">
+        <h2 className="font-semibold text-lg">Transaction Breakdown (FIFO)</h2>
 
-      <table className="w-full bg-white rounded shadow text-sm">
+        <div className="space-x-2">
+          <button onClick={() => toggleAll(true)} className="btn">
+            Expand all
+          </button>
+          <button onClick={() => toggleAll(false)} className="btn">
+            Collapse all
+          </button>
+        </div>
+      </div>
+
+      <table className="w-full text-sm border">
         <thead className="bg-slate-100">
           <tr>
-            <th className="text-start">Wallet</th>
-            <th className="text-start">Type</th>
-            <th className="text-start">Asset</th>
-            <th className="text-start">Qty</th>
-            <th className="text-start">Unit Price</th>
-            <th className="text-start">Fee</th>
-            <th className="text-start">Market Price</th>
-            <th className="text-start">Executed At</th>
+            <th className="p-2 text-left">Date</th>
+            <th className="text-left">Type</th>
+            <th className="text-left">Asset</th>
+            <th className="text-left">Quantity</th>
+            <th className="text-left">Fee (ZAR)</th>
+            <th className="text-right">Gain (ZAR)</th>
           </tr>
         </thead>
 
         <tbody>
-          {transactions.map((tx, i) => {
-            const dateStr = formatDate(tx.executedAt);
-            const asset = tx.assetFrom || tx.assetTo;
-            const key = `${dateStr}-${asset}`;
-            const calc = calcByKey[key];
+          {rows.map((r, i) => (
+            <>
+              <tr
+                key={i}
+                className="border-t cursor-pointer hover:bg-slate-50"
+                onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
+              >
+                <td className="p-2">{r.date}</td>
+                <td className={typeColor(r.type)}>{r.type}</td>
+                <td>{r.asset}</td>
+                <td>{r.quantity || r.soldQuantity}</td>
+                <td>{r.fee || "–"}</td>
+                <td className="font-semibold text-right">
+                  {r.gain ? `R ${r.gain.toFixed(2)}` : "–"}
+                </td>
+              </tr>
 
-            const isDisposal = tx.type === "SELL" || tx.type === "TRADE";
-            const view = formatTransactionRow(tx);
+              {open[i] && r.lots && (
+                <tr className="bg-slate-50">
+                  <td colSpan="6" className="p-3 space-y-2">
+                    <strong>FIFO lots used:</strong>
 
-            return (
-              <Fragment key={key}>
-                <tr
-                  className={`border-t ${
-                    isDisposal
-                      ? "cursor-pointer hover:bg-slate-50"
-                      : "bg-slate-50"
-                  }`}
-                  onClick={() => {
-                    if (isDisposal) {
-                      setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
-                    }
-                    alert(JSON.stringify(tx));
-                  }}
-                >
-                  <td>{tx.wallet}</td>
+                    <ul className="list-disc pl-6">
+                      {r.lots.map((l, idx) => (
+                        <li key={idx}>
+                          {l.quantity} {l.asset} @ R{l.unitPriceZar}/coin on{" "}
+                          {l.date}
+                        </li>
+                      ))}
+                    </ul>
 
-                  <td>
-                    <span className="font-medium">{tx.type}</span>
-                    <div className="text-xs text-slate-500">
-                      {view.subtitle}
+                    <div className="pt-2 border-t">
+                      <div>
+                        <strong>Proceeds:</strong> R {r.proceeds}
+                      </div>
+                      <div>
+                        <strong>Cost:</strong> R {r.cost}
+                      </div>
+                      <div>
+                        <strong>Capital Gain:</strong> R {r.gain} on {r.date}
+                      </div>
                     </div>
                   </td>
-
-                  <td className="font-mono">{view.asset}</td>
-
-                  <td>{view.quantity}</td>
-                  <td className="text-start">{view.unitPrice}</td>
-                  <td className="text-start">{view.fee}</td>
-                  <td className="text-start">{view.marketPrice || "-"}</td>
-                  <td className="text-start">{dateStr}</td>
                 </tr>
-
-                {isDisposal && open[key] && calc && (
-                  <tr className="bg-slate-50">
-                    <td colSpan="5" className="p-4 space-y-4">
-                      <div>
-                        <strong>Calculation Details:</strong>
-                        <div>Proceeds: {money(calc.proceeds)}</div>
-                        <div>Cost: {money(calc.cost)}</div>
-                        <div>Gain: {money(calc.gain)}</div>
-                        {calc.from && <div>From: {calc.from}</div>}
-                        {calc.to && <div>To: {calc.to}</div>}
-                        {calc.soldQuantity && (
-                          <div>Sold Quantity: {calc.soldQuantity}</div>
-                        )}
-                      </div>
-
-                      <FifoBreakdown disposal={calc} />
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            );
-          })}
+              )}
+            </>
+          ))}
         </tbody>
       </table>
     </div>

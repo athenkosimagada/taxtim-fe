@@ -1,69 +1,74 @@
 import { useState } from "react";
+
 import Header from "./components/Header";
-import PasteTransactions from "./components/PasteTransactions";
-import Tabs from "./components/Tabs";
+import PasteInput from "./components/PasteInput";
 import TransactionsTable from "./components/TransactionsTable";
-import BaseCostTable from "./components/BaseCostTable";
-import CapitalGainsTable from "./components/CapitalGainsTable";
+import CapitalGainsSummary from "./components/CapitalGainsSummary";
+import BaseCosts from "./components/BaseCosts";
+import { Button } from "./components/Button";
+
+import { buildDisplayRows, parseExcelPaste } from "./lib/utils";
 import { api } from "./api";
-import { parseExcelPaste } from "./lib/utils";
 
 export default function App() {
-  const [input, setInput] = useState("");
+  const [paste, setPaste] = useState("");
   const [result, setResult] = useState(null);
-  const [tab, setTab] = useState("transactions");
+  const [status, setStatus] = useState("");
 
-  async function calculate() {
-    const txs = parseExcelPaste(input);
-    await api.importTransactions(txs);
-    const res = await api.calculate();
-    setResult(res);
-  }
+  const calculate = async () => {
+    try {
+      setStatus("Calculating…");
 
-  async function clearAll() {
-    if (!confirm("Delete all transactions and start over?")) return;
+      const parsed = parseExcelPaste(paste);
+      await api.importTransactions(parsed);
+
+      const fifo = await api.calculate();
+      setResult(fifo);
+
+      setStatus("");
+    } catch (e) {
+      console.error(e);
+      setStatus("Error processing transactions");
+    }
+  };
+
+  const resetAll = async () => {
+    if (!confirm("This will remove ALL transactions. Continue?")) return;
+
     await api.clearAll();
-    setInput("");
+    setPaste("");
     setResult(null);
-  }
+    setStatus("All data cleared.");
+  };
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-100">
       <Header />
 
-      <main className="max-w-6xl mx-auto p-4 space-y-6">
-        <PasteTransactions
-          value={input}
-          onChange={setInput}
-          onCalculate={calculate}
-          onClear={clearAll}
-        />
+      <main className="max-w-6xl mx-auto p-6 space-y-6">
+        <PasteInput value={paste} onChange={setPaste} />
+
+        <div className="flex gap-3">
+          <Button onClick={calculate}>Calculate</Button>
+          <Button onClick={resetAll} variant="danger">
+            Clear & Restart
+          </Button>
+        </div>
+
+        {status && (
+          <div className="bg-yellow-100 border p-3 rounded">{status}</div>
+        )}
 
         {result && (
           <>
-            <Tabs active={tab} setActive={setTab} />
+            <TransactionsTable rows={buildDisplayRows(result)} />
 
-            {tab === "transactions" && (
-              <TransactionsTable
-                transactions={result.transactions}
-                calculations={result.calculations}
-              />
-            )}
+            <CapitalGainsSummary capitalGains={result.capitalGains} />
 
-            {tab === "baseCosts" && (
-              <BaseCostTable data={result.baseCostSnapshots} />
-            )}
-
-            {tab === "gains" && (
-              <CapitalGainsTable
-                data={
-                  result.capitalGains[Object.keys(result.capitalGains).pop()]
-                }
-              />
-            )}
+            <BaseCosts snapshots={result.baseCostSnapshots} />
           </>
         )}
       </main>
-    </>
+    </div>
   );
 }
