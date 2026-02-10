@@ -4,9 +4,15 @@ import { useAuth } from "../../../features/auth/hooks/useAuth";
 import NavLink from "./NavLink";
 
 export default function Header() {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { isAuthenticated, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate("/auth/login");
+  }
 
   return (
     <header className="sticky top-0 bg-white border-b border-gray-200 z-10">
@@ -55,7 +61,7 @@ export default function Header() {
             <>
               <NavLink to="/dashboard">Dashboard</NavLink>
               <button
-                onClick={() => logout()}
+                onClick={handleLogout}
                 className="text-white bg-blue-600 hover:bg-blue-700 rounded-xl px-4 py-2 font-semibold focus:outline-none focus:ring-4 focus:ring-blue-300"
               >
                 Logout
