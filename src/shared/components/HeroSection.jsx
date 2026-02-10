@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export function HeroSection({
+export default function HeroSection({
   title,
   subtitle,
   primaryAction,

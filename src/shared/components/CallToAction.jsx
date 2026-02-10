@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export function CallToAction({ message, button }) {
+export default function CallToAction({ message, button }) {
   return (
     <section className="bg-blue-600 text-white rounded-2xl p-10 text-center">
       <p className="text-xl md:text-2xl mb-6 max-w-3xl mx-auto">{message}</p>

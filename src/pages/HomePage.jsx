@@ -1,8 +1,8 @@
-import { PageContainer } from "../shared/components/PageContainer";
-import { HeroSection } from "../shared/components/HeroSection";
-import { InfoCard } from "../shared/components/InfoCard";
-import { HowItWorks } from "../shared/components/HowItWorks";
-import { CallToAction } from "../shared/components/CallToAction";
+import PageContainer from "../shared/components/PageContainer";
+import HeroSection from "../shared/components/HeroSection";
+import InfoCard from "../shared/components/InfoCard";
+import HowItWorks from "../shared/components/HowItWorks";
+import CallToAction from "../shared/components/CallToAction";
 
 export default function HomePage() {
   return (

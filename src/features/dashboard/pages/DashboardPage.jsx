@@ -1,10 +1,17 @@
-import StatsCard from "../components/StatsCard";
+import WelcomeCard from "../components/WelcomeCard";
+import UploadTransactionsCard from "../components/UploadTransactionsCard ";
+import TransactionsSummary from "../components/TransactionsSummary";
+import HelpCard from "../components/HelpCard";
+
+import PageContainer from "../../../shared/components/PageContainer";
 
 export default function DashboardPage() {
   return (
-    <>
-      <h1>Dashboard</h1>
-      <StatsCard title="Users" value="120" />
-    </>
+    <PageContainer>
+      <WelcomeCard />
+      <UploadTransactionsCard />
+      <TransactionsSummary />
+      <HelpCard />
+    </PageContainer>
   );
 }
