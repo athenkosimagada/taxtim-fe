@@ -1,31 +1,44 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
-export async function httpClient(
-  endpoint,
-  { method = "GET", body, headers = {} } = {},
-) {
+async function request(path, options = {}) {
   const token = localStorage.getItem("token");
 
-  const config = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
   };
 
-  if (body) {
-    config.body = JSON.stringify(body);
+  console.log("Making request to:", `${API_URL}${path}`);
+  console.log("Request options:", { ...options, headers });
+
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  let data = null;
+
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    data = await res.json();
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || data.message || "API request failed");
+  if (!res.ok) {
+    throw new Error(data?.message || "Request failed");
   }
 
   return data;
 }
+
+const httpClient = {
+  get: (path) => request(path),
+  post: (path, body) =>
+    request(path, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+};
+
+export default httpClient;

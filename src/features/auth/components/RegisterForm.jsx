@@ -3,12 +3,12 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
   const { register, loading, error } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,10 +16,8 @@ export default function RegisterForm() {
       setErrorMessage("Passwords do not match");
       return;
     }
-    const success = await register(email, password);
-    if (success) {
-      navigate("/auth/login");
-    }
+    await register(email, password);
+    navigate("/login");
   };
 
   return (
@@ -83,7 +81,7 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white font-semibold rounded-md py-3 hover:bg-blue-700 disabled:opacity-50"
+        className="cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-md py-3 hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Registering..." : "Create Account"}
       </button>

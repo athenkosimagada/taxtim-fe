@@ -1,15 +1,9 @@
-import { httpClient } from "../../../shared/services/httpClient";
+import httpClient from "../../../shared/services/httpClient";
 
-export function loginApi(email, password) {
-  return httpClient("/login", {
-    method: "POST",
-    body: { email, password },
-  });
+export function loginRequest(email, password) {
+  return httpClient.post("/login", { email, password });
 }
 
-export function registerApi(email, password) {
-  return httpClient("/register", {
-    method: "POST",
-    body: { email, password },
-  });
+export function registerRequest(email, password) {
+  return httpClient.post("/register", { email, password });
 }

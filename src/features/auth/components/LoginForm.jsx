@@ -3,17 +3,15 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
+  const navigate = useNavigate();
   const { login, loading, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
-      navigate("/dashboard");
-    }
+    await login(email, password);
+    navigate("/dashboard");
   };
 
   return (
@@ -56,7 +54,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white font-semibold rounded-md py-3 hover:bg-blue-700 disabled:opacity-50"
+        className="cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-md py-3 hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Logging in..." : "Log In"}
       </button>
