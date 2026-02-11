@@ -17,7 +17,7 @@ export default function RegisterForm() {
       return;
     }
     await register(email, password);
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   return (

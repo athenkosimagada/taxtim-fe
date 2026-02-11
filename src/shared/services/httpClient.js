@@ -34,6 +34,7 @@ async function request(path, options = {}) {
 
 const httpClient = {
   get: (path) => request(path),
+  delete: (path) => request(path, { method: "DELETE" }),
   post: (path, body) =>
     request(path, {
       method: "POST",
