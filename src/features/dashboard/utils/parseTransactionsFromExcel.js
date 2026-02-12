@@ -1,5 +1,29 @@
 import * as XLSX from "xlsx";
-import { parseNumber, parsePrice, normalizeDate } from "./parseTransactions";
+
+function excelSerialToDateOnly(serial) {
+  if (!serial) return null;
+
+  const utcDays = Math.floor(serial - 25569);
+  const utcValue = utcDays * 86400;
+  const date = new Date(utcValue * 1000);
+
+  return date.toISOString().split("T")[0];
+}
+
+function parseNumber(value) {
+  if (value === null || value === undefined || value === "") return 0;
+
+  if (typeof value === "number") return value;
+
+  return parseFloat(
+    value.toString().replace(/R/gi, "").replace(/,/g, "").trim(),
+  );
+}
+
+function normalizeType(type) {
+  if (!type) return null;
+  return type.toString().trim().toUpperCase();
+}
 
 export function parseTransactionsFromExcel(file) {
   return new Promise((resolve, reject) => {
@@ -7,71 +31,86 @@ export function parseTransactionsFromExcel(file) {
 
     reader.onload = (e) => {
       try {
-        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const data = e.target.result;
+
+        const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        if (!rows || rows.length < 2) {
-          return reject(new Error("Excel file appears empty or missing data"));
-        }
-
-        const [, ...dataRows] = rows;
-        const transactions = [];
-
-        dataRows.forEach((row, idx) => {
-          if (!row || !row.some((cell) => cell != null && cell !== "")) return;
-
-          while (row.length < 7) row.push(null);
-
-          const [
-            date,
-            type,
-            sellCoin,
-            sellAmount,
-            buyCoin,
-            buyAmount,
-            buyPricePerCoin,
-          ] = row;
-
-          if (!type) return;
-
-          const parsedSellAmount = parseNumber(sellAmount);
-          const parsedBuyAmount = parseNumber(buyAmount);
-          const parsedPrice = parsePrice(buyPricePerCoin);
-          const parsedDate = normalizeDate(date);
-
-          if (parsedSellAmount == null && parsedBuyAmount == null) return;
-
-          transactions.push({
-            date: parsedDate,
-            type: type.toString().trim(),
-            sellCoin: sellCoin?.toString().trim(),
-            sellAmount: parsedSellAmount,
-            buyCoin: buyCoin?.toString().trim(),
-            buyAmount: parsedBuyAmount,
-            pricePerCoin: parsedPrice,
-          });
+        const rows = XLSX.utils.sheet_to_json(sheet, {
+          raw: true,
+          defval: "",
         });
 
+        if (!rows.length) {
+          throw new Error("Excel file is empty.");
+        }
+
+        const transactions = rows
+          .map((row, index) => {
+            const {
+              Date,
+              Type,
+              SellCoin,
+              SellAmount,
+              BuyCoin,
+              BuyAmount,
+              BuyPricePerCoin,
+            } = row;
+
+            const type = normalizeType(Type);
+            if (!type) return null;
+
+            const sellCoin = SellCoin?.toString().trim();
+            const buyCoin = BuyCoin?.toString().trim();
+
+            const sellAmount = parseNumber(SellAmount);
+            const buyAmount = parseNumber(BuyAmount);
+            const pricePerCoin = parseNumber(BuyPricePerCoin);
+
+            let normalizedDate = null;
+
+            if (typeof Date === "number") {
+              normalizedDate = excelSerialToDateOnly(Date);
+            } else if (Date) {
+              const parsed = new Date(Date);
+              if (!isNaN(parsed)) {
+                normalizedDate = parsed.toISOString().split("T")[0];
+              }
+            }
+
+            if (!normalizedDate) {
+              throw new Error(`Invalid date format in row ${index + 2}`);
+            }
+
+            return {
+              date: normalizedDate,
+              type,
+              sellCoin,
+              sellAmount,
+              buyCoin,
+              buyAmount,
+              pricePerCoin,
+            };
+          })
+          .filter(Boolean);
+
         if (!transactions.length) {
-          return reject(
-            new Error(
-              "No valid transactions found. Please check your Excel rows or pasted text.",
-            ),
-          );
+          throw new Error("No valid transactions found.");
         }
 
         resolve(transactions);
       } catch (err) {
         reject(
           new Error(
-            "Invalid Excel file format or data. Make sure you have the correct columns.",
+            err.message ||
+              "Invalid Excel file format. Please check column names and values.",
           ),
         );
       }
     };
 
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsBinaryString(file);
+    reader.onerror = () => reject(new Error("Failed to read Excel file."));
+
+    reader.readAsArrayBuffer(file);
   });
 }
