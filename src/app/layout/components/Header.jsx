@@ -57,17 +57,16 @@ export default function Header() {
             menuOpen ? "block" : "hidden"
           } sm:block nav-actions`}
         >
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/dashboard">Dashboard</NavLink>
           {isAuthenticated ? (
             <>
-              <NavLink to="/dashboard">Dashboard</NavLink>
               <button onClick={handleLogout} className="btn btn-primary">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <NavLink to="/">Home</NavLink>
-              <NavLink to="/dashboard">Dashboard</NavLink>
               <NavLink to="/auth/login" variant="button">
                 Login
               </NavLink>
