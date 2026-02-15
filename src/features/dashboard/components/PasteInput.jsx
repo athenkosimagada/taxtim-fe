@@ -21,7 +21,7 @@ export default function PasteInput({ pasteData, onChange }) {
         value={pasteData}
         onChange={onChange}
         placeholder={`Date Type SellCoin SellAmount BuyCoin BuyAmount BuyPricePerCoin\n2024-06-01 BUY ZAR 10000 BTC 0.1 100000`}
-        className="w-full h-32 bg-[#0F1E2C] border border-white/20 rounded-xl p-4 text-gray-900 text-sm placeholder:text-grey-600 transition resize-none"
+        className="w-full h-32 bg-white border border-white/20 rounded-xl p-4 text-gray-900 text-sm placeholder:text-grey-600 transition resize-none"
       />
     </div>
   );
