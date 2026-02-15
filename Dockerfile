@@ -1,34 +1,36 @@
-# Stage 1: Build the app
+# Stage 1: Build React app
 FROM node:20-alpine AS build
 
-# Set working directory
+# Install build dependencies
+RUN apk add --no-cache git python3 g++ make
+
 WORKDIR /app
 
-# Copy package files
+# Copy package.json and package-lock.json first (for caching)
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (ignore peer conflicts)
+RUN npm install --legacy-peer-deps
 
-# Copy the rest of the source code
+# Copy the rest of the app
 COPY . .
 
-# Build for production
+# Build production assets
 RUN npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-# Remove default nginx website
+# Remove default Nginx content
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built files
+# Copy built files from Stage 1
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Optional: custom Nginx config for SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom Nginx config (optional)
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
+# Expose port 80
 EXPOSE 80
 
 # Start Nginx
