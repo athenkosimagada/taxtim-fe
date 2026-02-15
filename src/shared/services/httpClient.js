@@ -10,9 +10,6 @@ async function request(path, options = {}) {
     ...options.headers,
   };
 
-  console.log("Making request to:", `${API_URL}${path}`);
-  console.log("Request options:", { ...options, headers });
-
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,

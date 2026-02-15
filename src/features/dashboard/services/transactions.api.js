@@ -11,3 +11,7 @@ export function calculateTransactions() {
 export function deleteAllTransactions() {
   return httpClient.delete("/transactions");
 }
+
+export function getTaxYearReport(year) {
+  return httpClient.get(`/reports/tax-year/${year}`);
+}
